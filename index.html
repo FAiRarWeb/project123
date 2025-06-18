@@ -16,7 +16,6 @@
   <body style="margin: 0; overflow: hidden">
     <video
       id="ar-video"
-      src="https://fairarweb.github.io/project123/videoAR.mp4"
       loop
       autoplay
       muted
@@ -26,7 +25,7 @@
 
     <a-scene
       mindar-image="https://fairarweb.github.io/project123/targets.mind; 
-                    uiScanning: no; 
+                    uiScanning: yes; 
                     filterMinCF: 0.0001; 
                     filterBeta: 0.001; 
                     missTolerance: 5; 
@@ -59,6 +58,8 @@
     </a-scene>
 
     <script>
+      console.log("AR app initializing...");
+      
       const video = document.getElementById("ar-video");
       const videoPlane = document.getElementById("video-plane");
       let currentTarget = null;
@@ -87,15 +88,19 @@
       });
 
       document.addEventListener("DOMContentLoaded", async () => {
+        console.log("DOM loaded, requesting camera...");
         try {
           const stream = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } },
           });
+          console.log("Camera access granted");
+          video.removeAttribute("src");
           video.srcObject = stream;
           video.setAttribute("playsinline", true);
           video.play();
         } catch (err) {
-          console.warn("Camera access failed:", err);
+          console.error("Camera access failed:", err);
+          alert("Camera access failed: " + err.message);
         }
       });
     </script>

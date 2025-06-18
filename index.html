@@ -1,63 +1,103 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>MindAR Video on Multiple Targets</title>
-    <script src="https://cdn.jsdelivr.net/npm/aframe@1.5.0/dist/aframe.min.js"></script>
+    <meta charset="UTF-8" />
+    <title>Combined AR App</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      .a-enter-vr {
+        display: none !important;
+      }
+    </style>
   </head>
-  <body>
-    <script>
-      AFRAME.registerComponent("video-handler", {
-        init: function () {
-          const video = document.querySelector("#video");
-          this.el.addEventListener("targetFound", (e) => {
-            video.play();
-          });
-          this.el.addEventListener("targetLost", (e) => {
-            video.pause();
-          });
-        },
-      });
-    </script>
+
+  <body style="margin: 0; overflow: hidden">
+    <video
+      id="ar-video"
+      src="https://fairarweb.github.io/project123/videoAR.mp4"
+      loop
+      autoplay
+      muted
+      playsinline
+      style="display: none"
+    ></video>
 
     <a-scene
-      mindar-image="imageTargetSrc: https://FAiRarWeb.github.io/project123/targets.mind; autoStart: true; uiLoading: yes; uiScanning: yes;"
+      mindar-image="https://fairarweb.github.io/project123/targets.mind; 
+                    uiScanning: no; 
+                    filterMinCF: 0.0001; 
+                    filterBeta: 0.001; 
+                    missTolerance: 5; 
+                    warmupTolerance: 3;"
       vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: true"
+      device-orientation-permission-ui="enabled: false"
+      renderer="precision: high; antialias: true;"
     >
-      <a-assets>
-        <video
-          id="video"
-          src="https://fairarweb.github.io/project123/videoAR.mp4"
-          preload="auto"
-          loop="true"
-          crossorigin="anonymous"
-          webkit-playsinline
-          playsinline
-        ></video>
-      </a-assets>
-
-      <!-- First Target -->
-      <a-entity mindar-image-target="targetIndex: 0" video-handler>
-        <a-video
-          src="#video"
-          width="1"
-          height="0.5625"
-          position="0 0 0"
-        ></a-video>
-      </a-entity>
-
-      <!-- Second Target -->
-      <a-entity mindar-image-target="targetIndex: 1" video-handler>
-        <a-video
-          src="#video"
-          width="1"
-          height="0.5625"
-          position="0 0 0"
-        ></a-video>
-      </a-entity>
-
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <a-entity mindar-image-target="targetIndex: 0" id="target-0">
+        <a-entity class="tv-frame" position="0 0 -0.01">
+          <a-entity class="tv-stand"></a-entity>
+        </a-entity>
+        <a-entity class="video-container" position="0 0 0">
+          <a-video
+            id="video-plane"
+            src="https://fairarweb.github.io/project123/videoAR.mp4"
+            position="0 0 0"
+            width="1"
+            height="0.45"
+            scale="1 1 1"
+            visible="true"
+          ></a-video>
+        </a-entity>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 1" id="target-1">
+      </a-entity>
     </a-scene>
+
+    <script>
+      const video = document.getElementById("ar-video");
+      const videoPlane = document.getElementById("video-plane");
+      let currentTarget = null;
+
+      const target0 = document.querySelector("#target-0");
+      const target1 = document.querySelector("#target-1");
+
+      target0.addEventListener("targetFound", () => {
+        currentTarget = "target-0";
+        videoPlane.setAttribute("visible", true);
+        video.play();
+      });
+
+      target0.addEventListener("targetLost", () => {
+        currentTarget = null;
+        video.pause();
+        videoPlane.setAttribute("visible", false);
+      });
+
+      target1.addEventListener("targetFound", () => {
+        currentTarget = "target-1";
+      });
+
+      target1.addEventListener("targetLost", () => {
+        currentTarget = null;
+      });
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } },
+          });
+          video.srcObject = stream;
+          video.setAttribute("playsinline", true);
+          video.play();
+        } catch (err) {
+          console.warn("Camera access failed:", err);
+        }
+      });
+    </script>
   </body>
 </html>

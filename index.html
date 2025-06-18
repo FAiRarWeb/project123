@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MindAR Video on Multiple Targets</title>
+    <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.4/dist/aframe/mindar-aframe.prod.js"></script>
+  </head>
+  <body>
+    <script>
+      AFRAME.registerComponent("video-handler", {
+        init: function () {
+          const video = document.querySelector("#video");
+          this.el.addEventListener("targetFound", (e) => {
+            video.play();
+          });
+          this.el.addEventListener("targetLost", (e) => {
+            video.pause();
+          });
+        },
+      });
+    </script>
+
+    <a-scene
+      mindar-image="https://cdn.glitch.global/7023fcc7-081b-4ed1-8734-117236a1c949/targets.mind?v=1747106267337; autoStart: true; uiLoading: yes; uiScanning: yes;"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: true"
+    >
+      <a-assets>
+        <video
+          id="video"
+          src="https://cdn.glitch.me/7023fcc7-081b-4ed1-8734-117236a1c949/RE_compiled%20animated.mp4?v=1745478073054"
+          preload="auto"
+          loop="true"
+          crossorigin="anonymous"
+          webkit-playsinline
+          playsinline
+        ></video>
+      </a-assets>
+
+      <!-- First Target -->
+      <a-entity mindar-image-target="targetIndex: 0" video-handler>
+        <a-video
+          src="https://cdn.glitch.me/7023fcc7-081b-4ed1-8734-117236a1c949/RE_compiled%20animated.mp4?v=1745478073054"
+          width="1"
+          height="0.5625"
+          position="0 0 0"
+        ></a-video>
+      </a-entity>
+
+      <!-- Second Target -->
+      <a-entity mindar-image-target="targetIndex: 1" video-handler>
+        <a-video
+          src="https://cdn.glitch.me/7023fcc7-081b-4ed1-8734-117236a1c949/RE_compiled%20animated.mp4?v=1745478073054"
+          width="1"
+          height="0.5625"
+          position="0 0 0"
+        ></a-video>
+      </a-entity>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    </a-scene>
+  </body>
+</html>

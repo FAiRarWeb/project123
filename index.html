@@ -2,8 +2,8 @@
 <html>
   <head>
     <title>MindAR Video on Multiple Targets</title>
-    <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.4/dist/aframe/mindar-aframe.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe@1.5.0/dist/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   </head>
   <body>
     <script>
@@ -21,7 +21,7 @@
     </script>
 
     <a-scene
-      mindar-image=" https://FAiRarWeb.github.io/project123/targets.mind; autoStart: true; uiLoading: yes; uiScanning: yes;"
+      mindar-image="imageTargetSrc: https://FAiRarWeb.github.io/project123/targets.mind; autoStart: true; uiLoading: yes; uiScanning: yes;"
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: true"
     >
@@ -40,7 +40,7 @@
       <!-- First Target -->
       <a-entity mindar-image-target="targetIndex: 0" video-handler>
         <a-video
-          src="https://fairarweb.github.io/project123/videoAR.mp4"
+          src="#video"
           width="1"
           height="0.5625"
           position="0 0 0"
@@ -50,7 +50,7 @@
       <!-- Second Target -->
       <a-entity mindar-image-target="targetIndex: 1" video-handler>
         <a-video
-          src="https://fairarweb.github.io/project123/videoAR.mp4"
+          src="#video"
           width="1"
           height="0.5625"
           position="0 0 0"

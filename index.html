@@ -128,15 +128,35 @@
           
           const updateLayout = (orientation) => {
             console.log("Device orientation:", orientation);
-            // Apply layout changes based on detected orientation
-            // No need to rotate UI elements as we're detecting actual orientation
+            
+            if (orientation === 'landscape') {
+              // Rotate video 180 degrees in landscape mode
+              videoPlane.setAttribute("rotation", "0 0 180");
+              
+              // Rotate UI buttons
+              toggleButton.style.transform = "rotate(180deg)";
+              googleButton.style.transform = "rotate(180deg)";
+            } else {
+              // Reset rotation in portrait mode
+              videoPlane.setAttribute("rotation", "0 0 0");
+              
+              // Reset UI buttons rotation
+              toggleButton.style.transform = "rotate(0deg)";
+              googleButton.style.transform = "translate(-50%, -50%) scale(1)";
+            }
           };
+          
+          // Initialize layout based on current orientation
+          updateLayout(deviceOrientation);
           
           this.el.addEventListener("targetFound", () => {
             console.log("Target found");
             videoPlane.setAttribute("visible", true);
             videoEl.play().catch(e => console.warn("Autoplay blocked:", e));
             toggleButton.style.display = "block";
+            
+            // Apply current orientation when target is found
+            updateLayout(deviceOrientation);
           });
 
           this.el.addEventListener("targetLost", () => {
@@ -172,7 +192,10 @@
 
             googleButton.style.left = `${x}px`;
             googleButton.style.top = `${y}px`;
-            googleButton.style.transform = `translate(-50%, -50%) scale(${scaleFactor})`;
+            
+            // Apply rotation based on current orientation along with scaling
+            const rotation = deviceOrientation === 'landscape' ? 'rotate(180deg)' : 'rotate(0deg)';
+            googleButton.style.transform = `translate(-50%, -50%) scale(${scaleFactor}) ${rotation}`;
           };
         },
       });

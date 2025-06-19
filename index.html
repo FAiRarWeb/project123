@@ -5,20 +5,9 @@
     <title>MindAR Video AR</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-    <!-- Updated library sources with integrity checks -->
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js" integrity="sha384-4UEyZLVKYMoKQQmXSqPCkm+wWAU0ZOZ9WhPDxDYLXnNJQN6qMdpK9O0Rw+8VRJV" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js" crossorigin="anonymous"></script>
-    
-    <!-- Fallback script to handle loading errors -->
-    <script>
-      window.addEventListener('error', function(e) {
-        if (e.target.tagName === 'SCRIPT') {
-          console.error('Script loading error:', e.target.src);
-          document.body.innerHTML = '<div style="color:white;text-align:center;padding:20px;">Error loading AR libraries. Please check your connection and try refreshing the page.</div>';
-        }
-      }, true);
-    </script>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
       html,
@@ -66,7 +55,7 @@
         color: white;
         border: none;
         border-radius: 4px;
-        padding: 18px 15px;
+        padding: 10px 15px;
         font-weight: bold;
         cursor: pointer;
         display: none;
@@ -79,11 +68,10 @@
     <a-scene
       mindar-image="imageTargetSrc: https://FAiRarWeb.github.io/project123/targets.mind;
                     uiScanning: true;
-                    filterMinCF: 0.00001;
-                    filterBeta: 0.0005;
-                    missTolerance: 8;
-                    warmupTolerance: 5;
-                    showStats: true;"
+                    filterMinCF: 0.0001;
+                    filterBeta: 0.001;
+                    missTolerance: 5;
+                    warmupTolerance: 3;"
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: false"
       renderer="precision: high; antialias: true"
@@ -181,38 +169,6 @@
             }
           };
         },
-      });
-    </script>
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // Check if MindAR is loaded properly
-        setTimeout(function() {
-          if (typeof AFRAME === 'undefined') {
-            console.error('A-Frame not loaded');
-            document.body.innerHTML = '<div style="color:white;text-align:center;padding:20px;">A-Frame library failed to load. Please check your connection and try again.</div>';
-          } else if (typeof MindARCore === 'undefined' || typeof AFRAME.components['mindar-image-system'] === 'undefined') {
-            console.error('MindAR not loaded');
-            document.body.innerHTML = '<div style="color:white;text-align:center;padding:20px;">MindAR library failed to load. Please check your connection and try again.</div>';
-          } else {
-            console.log('Libraries loaded successfully');
-          }
-        }, 1000);
-        
-        // Add error handling for video
-        const videoEl = document.querySelector("#video1");
-        videoEl.addEventListener('error', function() {
-          console.error('Video failed to load:', videoEl.error);
-        });
-        
-        // Log when AR system starts
-        const sceneEl = document.querySelector('a-scene');
-        sceneEl.addEventListener('loaded', function() {
-          console.log('A-Frame scene loaded');
-        });
-        
-        sceneEl.addEventListener('arError', function(event) {
-          console.error('AR error:', event.detail);
-        });
       });
     </script>
   </body>

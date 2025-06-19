@@ -133,6 +133,27 @@
               toggleButton.textContent = "Show Button";
             }
           });
+          
+          // Add position tracking to make button follow the video
+          this.tick = function() {
+            if (googleButton.style.display === "block" && videoPlane.getAttribute("visible")) {
+              // Get the video element's position in screen coordinates
+              const position = this.el.object3D.position;
+              const videoPos = new THREE.Vector3(position.x, position.y, position.z);
+              videoPos.project(document.querySelector('a-camera').object3D.children[0]);
+              
+              // Convert to screen coordinates
+              const widthHalf = window.innerWidth / 2;
+              const heightHalf = window.innerHeight / 2;
+              const x = (videoPos.x * widthHalf) + widthHalf;
+              const y = -(videoPos.y * heightHalf) + heightHalf;
+              
+              // Position the button over the video
+              googleButton.style.left = x + "px";
+              googleButton.style.top = y + "px";
+              googleButton.style.transform = "translate(-50%, -50%)";
+            }
+          };
         },
       });
     </script>

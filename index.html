@@ -10,8 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-      html,
-      body {
+      html, body {
         margin: 0;
         padding: 0;
         width: 100%;
@@ -47,7 +46,7 @@
         padding: 8px 12px;
         display: none;
       }
-      
+
       .google-button {
         position: absolute;
         z-index: 20;
@@ -68,10 +67,11 @@
     <a-scene
       mindar-image="imageTargetSrc: https://FAiRarWeb.github.io/project123/targets.mind;
                     uiScanning: true;
-                    filterMinCF: 0.0001;
-                    filterBeta: 0.001;
-                    missTolerance: 5;
-                    warmupTolerance: 3;"
+                    filterMinCF: 0.0005;
+                    filterBeta: 0.01;
+                    missTolerance: 3;
+                    warmupTolerance: 2;
+                    debugUIEnabled: false"
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: false"
       renderer="precision: high; antialias: true"
@@ -106,14 +106,15 @@
           const videoPlane = this.el.querySelector("a-video");
           const toggleButton = document.querySelector("#toggleButton");
           const googleButton = document.querySelector("#googleButton");
-          
+          const camera = document.querySelector("a-camera").object3D;
+
           this.el.addEventListener("targetFound", () => {
             console.log("Target found");
             videoPlane.setAttribute("visible", true);
-            videoEl.play();
+            videoEl.play().catch(e => console.warn("Autoplay blocked:", e));
             toggleButton.style.display = "block";
           });
-          
+
           this.el.addEventListener("targetLost", () => {
             console.log("Target lost");
             videoEl.pause();
@@ -121,52 +122,47 @@
             toggleButton.style.display = "none";
             googleButton.style.display = "none";
           });
-          
+
           toggleButton.addEventListener("click", () => {
-            if (googleButton.style.display === "none" || googleButton.style.display === "") {
-              googleButton.style.display = "block";
-              toggleButton.textContent = "Hide Button";
-            } else {
-              googleButton.style.display = "none";
-              toggleButton.textContent = "Show Button";
+            const isHidden = googleButton.style.display === "none" || googleButton.style.display === "";
+            googleButton.style.display = isHidden ? "block" : "none";
+            toggleButton.textContent = isHidden ? "Hide Button" : "Show Button";
+          });
+
+          // Allow manual video playback if autoplay fails
+          document.body.addEventListener("click", () => {
+            if (videoEl.paused) {
+              videoEl.play().catch((e) => console.warn("Manual play failed:", e));
             }
           });
-          
-          // Add position tracking to make button follow the video
-          this.tick = function() {
-            if (googleButton.style.display === "block" && videoPlane.getAttribute("visible")) {
-              // Get world position of the video entity
+
+          // Smoother position updates using requestAnimationFrame
+          let ticking = false;
+          this.tick = () => {
+            if (ticking || googleButton.style.display !== "block" || !videoPlane.getAttribute("visible")) return;
+            ticking = true;
+
+            requestAnimationFrame(() => {
               const videoWorldPosition = new THREE.Vector3();
               videoPlane.object3D.getWorldPosition(videoWorldPosition);
-              
-              // Get video scale
-              const videoScale = videoPlane.object3D.scale;
-              const videoWidth = videoPlane.getAttribute("width") * videoScale.x;
-              
-              // Project to screen coordinates
-              const camera = document.querySelector('a-camera').object3D;
+
               const vector = videoWorldPosition.clone();
               vector.project(camera.children[0]);
-              
-              // Convert to screen coordinates
+
               const widthHalf = window.innerWidth / 2;
               const heightHalf = window.innerHeight / 2;
               const x = (vector.x * widthHalf) + widthHalf;
               const y = -(vector.y * heightHalf) + heightHalf;
-              
-              // Calculate distance from camera to determine scale
+
               const distance = camera.position.distanceTo(videoWorldPosition);
-              const baseDistance = 1; // Reference distance
-              const scaleFactor = Math.max(0.5, Math.min(1.5, baseDistance / Math.max(0.1, distance)));
-              
-              // Calculate button size based on video size in screen space
-              const buttonScale = scaleFactor * (videoWidth / 1); // Adjust divisor as needed
-              
-              // Position the button centered on the video
-              googleButton.style.left = x + "px";
-              googleButton.style.top = y + "px";
-              googleButton.style.transform = `translate(-50%, -50%) scale(${buttonScale})`;
-            }
+              const scaleFactor = Math.max(0.5, Math.min(1.5, 1 / Math.max(0.1, distance)));
+
+              googleButton.style.left = `${x}px`;
+              googleButton.style.top = `${y}px`;
+              googleButton.style.transform = `translate(-50%, -50%) scale(${scaleFactor})`;
+
+              ticking = false;
+            });
           };
         },
       });

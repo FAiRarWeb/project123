@@ -5,9 +5,20 @@
     <title>MindAR Video AR</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <!-- Updated library sources with integrity checks -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js" integrity="sha384-4UEyZLVKYMoKQQmXSqPCkm+wWAU0ZOZ9WhPDxDYLXnNJQN6qMdpK9O0Rw+8VRJV" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js" crossorigin="anonymous"></script>
+    
+    <!-- Fallback script to handle loading errors -->
+    <script>
+      window.addEventListener('error', function(e) {
+        if (e.target.tagName === 'SCRIPT') {
+          console.error('Script loading error:', e.target.src);
+          document.body.innerHTML = '<div style="color:white;text-align:center;padding:20px;">Error loading AR libraries. Please check your connection and try refreshing the page.</div>';
+        }
+      }, true);
+    </script>
 
     <style>
       html,
@@ -175,11 +186,17 @@
     <script>
       document.addEventListener('DOMContentLoaded', function() {
         // Check if MindAR is loaded properly
-        if (typeof AFRAME === 'undefined' || typeof MindARCore === 'undefined') {
-          console.error('Libraries not loaded properly');
-          document.body.innerHTML = '<div style="color:white;text-align:center;padding:20px;">Error loading AR libraries. Please check your connection.</div>';
-          return;
-        }
+        setTimeout(function() {
+          if (typeof AFRAME === 'undefined') {
+            console.error('A-Frame not loaded');
+            document.body.innerHTML = '<div style="color:white;text-align:center;padding:20px;">A-Frame library failed to load. Please check your connection and try again.</div>';
+          } else if (typeof MindARCore === 'undefined' || typeof AFRAME.components['mindar-image-system'] === 'undefined') {
+            console.error('MindAR not loaded');
+            document.body.innerHTML = '<div style="color:white;text-align:center;padding:20px;">MindAR library failed to load. Please check your connection and try again.</div>';
+          } else {
+            console.log('Libraries loaded successfully');
+          }
+        }, 1000);
         
         // Add error handling for video
         const videoEl = document.querySelector("#video1");

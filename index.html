@@ -133,15 +133,25 @@
               // Keep video in original orientation (no rotation)
               videoPlane.setAttribute("rotation", "0 0 0");
               
-              // Only rotate UI buttons
+              // Move toggle button to bottom right and rotate
+              toggleButton.style.top = "auto";
+              toggleButton.style.bottom = "10px";
+              toggleButton.style.right = "10px";
               toggleButton.style.transform = "rotate(90deg)";
+              
+              // Rotate Google button
               googleButton.style.transform = "rotate(90deg)";
             } else {
               // Keep original rotation in portrait mode
               videoPlane.setAttribute("rotation", "0 0 0");
               
-              // Reset UI buttons rotation
+              // Reset toggle button position to top right
+              toggleButton.style.top = "10px";
+              toggleButton.style.bottom = "auto";
+              toggleButton.style.right = "10px";
               toggleButton.style.transform = "rotate(0deg)";
+              
+              // Reset Google button rotation
               googleButton.style.transform = "translate(-50%, -50%) scale(1)";
             }
           };

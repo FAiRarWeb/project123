@@ -36,6 +36,33 @@
       .a-enter-vr {
         display: none !important;
       }
+
+      .control-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+        background-color: rgba(255, 255, 255, 0.7);
+        border-radius: 5px;
+        padding: 8px 12px;
+        display: none;
+      }
+      
+      .google-button {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 20;
+        background-color: #4285F4;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 15px;
+        font-weight: bold;
+        cursor: pointer;
+        display: none;
+      }
     </style>
   </head>
 
@@ -71,22 +98,40 @@
       </a-entity>
     </a-scene>
 
+    <button id="toggleButton" class="control-button">Show Button</button>
+    <button id="googleButton" class="google-button" onclick="window.open('https://www.google.com', '_blank')">Go to Google</button>
+
     <script>
       AFRAME.registerComponent("videohandler", {
         init: function () {
           const videoEl = document.querySelector("#video1");
           const videoPlane = this.el.querySelector("a-video");
-
+          const toggleButton = document.querySelector("#toggleButton");
+          const googleButton = document.querySelector("#googleButton");
+          
           this.el.addEventListener("targetFound", () => {
             console.log("Target found");
             videoPlane.setAttribute("visible", true);
             videoEl.play();
+            toggleButton.style.display = "block";
           });
-
+          
           this.el.addEventListener("targetLost", () => {
             console.log("Target lost");
             videoEl.pause();
             videoPlane.setAttribute("visible", false);
+            toggleButton.style.display = "none";
+            googleButton.style.display = "none";
+          });
+          
+          toggleButton.addEventListener("click", () => {
+            if (googleButton.style.display === "none" || googleButton.style.display === "") {
+              googleButton.style.display = "block";
+              toggleButton.textContent = "Hide Button";
+            } else {
+              googleButton.style.display = "none";
+              toggleButton.textContent = "Show Button";
+            }
           });
         },
       });

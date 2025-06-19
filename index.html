@@ -2,8 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>MindAR Video AR (Landscape)</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape" />
+    <title>MindAR Video AR (Flexible Orientation)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
@@ -60,43 +60,10 @@
         display: none;
         transform-origin: center;
       }
-
-      /* Prompt user to rotate to landscape */
-      #rotatePrompt {
-        display: none;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: black;
-        color: white;
-        font-size: 1.5em;
-        text-align: center;
-        justify-content: center;
-        align-items: center;
-        z-index: 999;
-      }
-
-      @media screen and (orientation: portrait) {
-        #rotatePrompt {
-          display: flex;
-        }
-
-        a-scene {
-          display: none !important;
-        }
-      }
     </style>
   </head>
 
   <body>
-    <!-- Rotate prompt for portrait users -->
-    <div id="rotatePrompt">
-      Please rotate your device to landscape mode.
-    </div>
-
-    <!-- AR Scene -->
     <a-scene
       mindar-image="imageTargetSrc: https://FAiRarWeb.github.io/project123/targets.mind;
                     uiScanning: true;
@@ -134,15 +101,6 @@
     <button id="googleButton" class="google-button" onclick="window.open('https://www.google.com', '_blank')">i</button>
 
     <script>
-      // Try locking to landscape (only works after user interaction)
-      window.addEventListener("load", () => {
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock("landscape").catch((err) => {
-            console.warn("Orientation lock failed:", err.message);
-          });
-        }
-      });
-
       AFRAME.registerComponent("videohandler", {
         init: function () {
           const videoEl = document.querySelector("#video1");
@@ -172,40 +130,33 @@
             toggleButton.textContent = isHidden ? "Hide Button" : "Show Button";
           });
 
-          // Manual video play on user interaction if autoplay fails
+          // Manual video play on user tap if autoplay fails
           document.body.addEventListener("click", () => {
             if (videoEl.paused) {
               videoEl.play().catch((e) => console.warn("Manual play failed:", e));
             }
           });
 
-          // Smooth UI positioning
-          let ticking = false;
           this.tick = () => {
-            if (ticking || googleButton.style.display !== "block" || !videoPlane.getAttribute("visible")) return;
-            ticking = true;
+            if (googleButton.style.display !== "block" || !videoPlane.getAttribute("visible")) return;
 
-            requestAnimationFrame(() => {
-              const videoWorldPosition = new THREE.Vector3();
-              videoPlane.object3D.getWorldPosition(videoWorldPosition);
+            const videoWorldPosition = new THREE.Vector3();
+            videoPlane.object3D.getWorldPosition(videoWorldPosition);
 
-              const vector = videoWorldPosition.clone();
-              vector.project(camera.children[0]);
+            const vector = videoWorldPosition.clone();
+            vector.project(camera.children[0]);
 
-              const widthHalf = window.innerWidth / 2;
-              const heightHalf = window.innerHeight / 2;
-              const x = (vector.x * widthHalf) + widthHalf;
-              const y = -(vector.y * heightHalf) + heightHalf;
+            const widthHalf = window.innerWidth / 2;
+            const heightHalf = window.innerHeight / 2;
+            const x = (vector.x * widthHalf) + widthHalf;
+            const y = -(vector.y * heightHalf) + heightHalf;
 
-              const distance = camera.position.distanceTo(videoWorldPosition);
-              const scaleFactor = Math.max(0.5, Math.min(1.5, 1 / Math.max(0.1, distance)));
+            const distance = camera.position.distanceTo(videoWorldPosition);
+            const scaleFactor = Math.max(0.5, Math.min(1.5, 1 / Math.max(0.1, distance)));
 
-              googleButton.style.left = `${x}px`;
-              googleButton.style.top = `${y}px`;
-              googleButton.style.transform = `translate(-50%, -50%) scale(${scaleFactor})`;
-
-              ticking = false;
-            });
+            googleButton.style.left = `${x}px`;
+            googleButton.style.top = `${y}px`;
+            googleButton.style.transform = `translate(-50%, -50%) scale(${scaleFactor})`;
           };
         },
       });

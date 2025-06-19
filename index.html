@@ -130,14 +130,14 @@
             console.log("Device orientation:", orientation);
             
             if (orientation === 'landscape') {
-              // Rotate video 90 degrees in landscape mode
-              videoPlane.setAttribute("rotation", "0 0 90");
+              // Keep video in original orientation (no rotation)
+              videoPlane.setAttribute("rotation", "0 0 0");
               
-              // Rotate UI buttons
+              // Only rotate UI buttons
               toggleButton.style.transform = "rotate(90deg)";
               googleButton.style.transform = "rotate(90deg)";
             } else {
-              // Reset rotation in portrait mode
+              // Keep original rotation in portrait mode
               videoPlane.setAttribute("rotation", "0 0 0");
               
               // Reset UI buttons rotation

@@ -107,33 +107,8 @@
           const toggleButton = document.querySelector("#toggleButton");
           const googleButton = document.querySelector("#googleButton");
           
-          // Check if device is in landscape mode
-          const checkOrientation = () => {
-            return window.innerWidth > window.innerHeight;
-          };
-          
-          // Handle orientation changes
-          window.addEventListener('resize', () => {
-            if (videoPlane.getAttribute("visible")) {
-              this.adjustForOrientation();
-            }
-          });
-          
-          this.adjustForOrientation = () => {
-            const isLandscape = checkOrientation();
-            // Adjust video plane for landscape
-            if (isLandscape) {
-              videoPlane.setAttribute("width", "1");
-              videoPlane.setAttribute("height", "0.45");
-            } else {
-              videoPlane.setAttribute("width", "0.7");
-              videoPlane.setAttribute("height", "0.4");
-            }
-          };
-          
           this.el.addEventListener("targetFound", () => {
             console.log("Target found");
-            this.adjustForOrientation();
             videoPlane.setAttribute("visible", true);
             videoEl.play();
             toggleButton.style.display = "block";
@@ -159,9 +134,6 @@
           
           // Add position tracking to make button follow the video
           this.tick = function() {
-            const videoPlane = this.el.querySelector("a-video");
-            const googleButton = document.querySelector("#googleButton");
-            
             if (googleButton.style.display === "block" && videoPlane.getAttribute("visible")) {
               // Get world position of the video entity
               const videoWorldPosition = new THREE.Vector3();

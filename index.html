@@ -107,22 +107,31 @@
           const toggleButton = document.querySelector("#toggleButton");
           const googleButton = document.querySelector("#googleButton");
           const camera = document.querySelector("a-camera").object3D;
-
-          const updateOrientation = () => {
-            const isLandscape = window.innerWidth > window.innerHeight;
-            const rotation = isLandscape ? 'rotate(0deg)' : 'rotate(0deg)'; // Optional: rotate(90deg) if you want vertical layout in portrait
-
-            toggleButton.style.transform += ` ${rotation}`;
-            googleButton.style.transform += ` ${rotation}`;
+          
+          // Track device orientation
+          let deviceOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+          
+          // Device orientation detection
+          window.addEventListener("deviceorientation", (event) => {
+            // Get gamma (rotation around front-to-back axis)
+            const gamma = Math.abs(event.gamma);
+            
+            // Determine orientation based on gamma angle
+            const newOrientation = (gamma > 45 && gamma < 135) ? 'landscape' : 'portrait';
+            
+            // Only update if orientation changed
+            if (newOrientation !== deviceOrientation) {
+              deviceOrientation = newOrientation;
+              updateLayout(deviceOrientation);
+            }
+          }, true);
+          
+          const updateLayout = (orientation) => {
+            console.log("Device orientation:", orientation);
+            // Apply layout changes based on detected orientation
+            // No need to rotate UI elements as we're detecting actual orientation
           };
-
-          // Run once at load
-          updateOrientation();
-
-          // Update on rotation
-          window.addEventListener("orientationchange", updateOrientation);
-          window.addEventListener("resize", updateOrientation);
-
+          
           this.el.addEventListener("targetFound", () => {
             console.log("Target found");
             videoPlane.setAttribute("visible", true);

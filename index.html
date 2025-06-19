@@ -2,8 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>MindAR Video AR</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>MindAR Video AR (Landscape)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape" />
 
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
@@ -16,10 +16,10 @@
         width: 100%;
         height: 100%;
         overflow: hidden;
+        background: black;
         position: fixed;
         top: 0;
         left: 0;
-        background: black;
       }
 
       a-scene {
@@ -60,10 +60,43 @@
         display: none;
         transform-origin: center;
       }
+
+      /* Prompt user to rotate to landscape */
+      #rotatePrompt {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        color: white;
+        font-size: 1.5em;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+      }
+
+      @media screen and (orientation: portrait) {
+        #rotatePrompt {
+          display: flex;
+        }
+
+        a-scene {
+          display: none !important;
+        }
+      }
     </style>
   </head>
 
   <body>
+    <!-- Rotate prompt for portrait users -->
+    <div id="rotatePrompt">
+      Please rotate your device to landscape mode.
+    </div>
+
+    <!-- AR Scene -->
     <a-scene
       mindar-image="imageTargetSrc: https://FAiRarWeb.github.io/project123/targets.mind;
                     uiScanning: true;
@@ -96,10 +129,20 @@
       </a-entity>
     </a-scene>
 
+    <!-- UI Buttons -->
     <button id="toggleButton" class="control-button">Show Button</button>
     <button id="googleButton" class="google-button" onclick="window.open('https://www.google.com', '_blank')">i</button>
 
     <script>
+      // Try locking to landscape (only works after user interaction)
+      window.addEventListener("load", () => {
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock("landscape").catch((err) => {
+            console.warn("Orientation lock failed:", err.message);
+          });
+        }
+      });
+
       AFRAME.registerComponent("videohandler", {
         init: function () {
           const videoEl = document.querySelector("#video1");
@@ -129,14 +172,14 @@
             toggleButton.textContent = isHidden ? "Hide Button" : "Show Button";
           });
 
-          // Allow manual video playback if autoplay fails
+          // Manual video play on user interaction if autoplay fails
           document.body.addEventListener("click", () => {
             if (videoEl.paused) {
               videoEl.play().catch((e) => console.warn("Manual play failed:", e));
             }
           });
 
-          // Smoother position updates using requestAnimationFrame
+          // Smooth UI positioning
           let ticking = false;
           this.tick = () => {
             if (ticking || googleButton.style.display !== "block" || !videoPlane.getAttribute("visible")) return;

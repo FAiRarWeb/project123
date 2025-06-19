@@ -50,9 +50,6 @@
       
       .google-button {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
         z-index: 20;
         background-color: #4285F4;
         color: white;
@@ -62,6 +59,7 @@
         font-weight: bold;
         cursor: pointer;
         display: none;
+        transform-origin: center;
       }
     </style>
   </head>
@@ -141,6 +139,10 @@
               const videoWorldPosition = new THREE.Vector3();
               videoPlane.object3D.getWorldPosition(videoWorldPosition);
               
+              // Get video scale
+              const videoScale = videoPlane.object3D.scale;
+              const videoWidth = videoPlane.getAttribute("width") * videoScale.x;
+              
               // Project to screen coordinates
               const camera = document.querySelector('a-camera').object3D;
               const vector = videoWorldPosition.clone();
@@ -152,10 +154,18 @@
               const x = (vector.x * widthHalf) + widthHalf;
               const y = -(vector.y * heightHalf) + heightHalf;
               
-              // Position the button over the video
+              // Calculate distance from camera to determine scale
+              const distance = camera.position.distanceTo(videoWorldPosition);
+              const baseDistance = 1; // Reference distance
+              const scaleFactor = Math.max(0.5, Math.min(1.5, baseDistance / Math.max(0.1, distance)));
+              
+              // Calculate button size based on video size in screen space
+              const buttonScale = scaleFactor * (videoWidth / 1); // Adjust divisor as needed
+              
+              // Position the button centered on the video
               googleButton.style.left = x + "px";
-              googleButton.style.top = (y - 50) + "px"; // Offset slightly above center
-              googleButton.style.transform = "translate(-50%, -50%)";
+              googleButton.style.top = y + "px";
+              googleButton.style.transform = `translate(-50%, -50%) scale(${buttonScale})`;
             }
           };
         },

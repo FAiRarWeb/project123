@@ -172,5 +172,31 @@
         },
       });
     </script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Check if MindAR is loaded properly
+        if (typeof AFRAME === 'undefined' || typeof MindARCore === 'undefined') {
+          console.error('Libraries not loaded properly');
+          document.body.innerHTML = '<div style="color:white;text-align:center;padding:20px;">Error loading AR libraries. Please check your connection.</div>';
+          return;
+        }
+        
+        // Add error handling for video
+        const videoEl = document.querySelector("#video1");
+        videoEl.addEventListener('error', function() {
+          console.error('Video failed to load:', videoEl.error);
+        });
+        
+        // Log when AR system starts
+        const sceneEl = document.querySelector('a-scene');
+        sceneEl.addEventListener('loaded', function() {
+          console.log('A-Frame scene loaded');
+        });
+        
+        sceneEl.addEventListener('arError', function(event) {
+          console.error('AR error:', event.detail);
+        });
+      });
+    </script>
   </body>
 </html>

@@ -136,7 +136,7 @@
               // Move toggle button to bottom right and rotate
               toggleButton.style.top = "auto";
               toggleButton.style.bottom = "10px";
-              toggleButton.style.right = "10px";
+              toggleButton.style.right = "80px";
               toggleButton.style.transform = "rotate(90deg)";
               
               // Rotate 
@@ -212,7 +212,7 @@
             
             // Apply rotation based on current orientation along with scaling
             const rotation = deviceOrientation === 'landscape' ? 'rotate(90deg)' : 'rotate(0deg)';
-            googleButton.style.transform = `translate(-50%, -10%) scale(${scaleFactor}) ${rotation}`;
+            googleButton.style.transform = `translate(-50%, -50%) scale(${scaleFactor}) ${rotation}`;
           };
         },
       });

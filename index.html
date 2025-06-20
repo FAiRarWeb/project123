@@ -60,6 +60,9 @@
         border-radius: 4px;
         padding: 10px 15px;
         display: none;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) scale(1);
       }
     </style>
   </head>
@@ -107,65 +110,52 @@
           const toggleButton = document.querySelector("#toggleButton");
           const googleButton = document.querySelector("#googleButton");
           const camera = document.querySelector("a-camera").object3D;
-          
-          // Track device orientation
+
           let deviceOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
-          
-          // Device orientation detection
+
           window.addEventListener("deviceorientation", (event) => {
-            // Get gamma (rotation around front-to-back axis)
             const gamma = Math.abs(event.gamma);
-            
-            // Determine orientation based on gamma angle
             const newOrientation = (gamma > 45 && gamma < 135) ? 'landscape' : 'portrait';
-            
-            // Only update if orientation changed
+
             if (newOrientation !== deviceOrientation) {
               deviceOrientation = newOrientation;
               updateLayout(deviceOrientation);
             }
           }, true);
-          
+
           const updateLayout = (orientation) => {
             console.log("Device orientation:", orientation);
-            
+
             if (orientation === 'landscape') {
-              // Keep video in original orientation (no rotation)
               videoPlane.setAttribute("rotation", "0 0 0");
-              
-              // Move toggle button to bottom right and rotate
+
               toggleButton.style.top = "auto";
               toggleButton.style.bottom = "80px";
               toggleButton.style.right = "10px";
               toggleButton.style.transform = "rotate(90deg)";
-              
-              // Rotate Google button
-              googleButton.style.transform = "rotate(90deg)";
+              toggleButton.style.display = "block";
+
+              googleButton.style.transform += " rotate(90deg)";
             } else {
-              // Keep original rotation in portrait mode
               videoPlane.setAttribute("rotation", "0 0 0");
-              
-              // Reset toggle button position to top right
+
               toggleButton.style.top = "10px";
               toggleButton.style.bottom = "auto";
               toggleButton.style.right = "10px";
               toggleButton.style.transform = "rotate(0deg)";
-              
-              // Reset Google button rotation
+              toggleButton.style.display = "block";
+
               googleButton.style.transform = "translate(-50%, -50%) scale(1)";
             }
           };
-          
-          // Initialize layout based on current orientation
+
           updateLayout(deviceOrientation);
-          
+
           this.el.addEventListener("targetFound", () => {
             console.log("Target found");
             videoPlane.setAttribute("visible", true);
             videoEl.play().catch(e => console.warn("Autoplay blocked:", e));
             toggleButton.style.display = "block";
-            
-            // Apply current orientation when target is found
             updateLayout(deviceOrientation);
           });
 
@@ -200,19 +190,15 @@
             const distance = camera.position.distanceTo(videoWorldPosition);
             const scaleFactor = Math.max(0.5, Math.min(1.5, 1 / Math.max(0.1, distance)));
 
-            // Adjust position based on orientation
             if (deviceOrientation === 'landscape') {
-              // Offset the button position to account for rotation
-              googleButton.style.left = `${x + 10}px`;  // Adjust these offset values as needed
-              googleButton.style.top = `${y - 30}px`;   // Adjust these offset values as needed
+              googleButton.style.left = `${x + 40}px`;
+              googleButton.style.top = `${y}px`;
+              googleButton.style.transform = `translate(-50%, -50%) scale(${scaleFactor}) rotate(90deg)`;
             } else {
               googleButton.style.left = `${x}px`;
-              googleButton.style.top = `${y}px`;
+              googleButton.style.top = `${y - 40}px`;
+              googleButton.style.transform = `translate(-50%, -50%) scale(${scaleFactor}) rotate(0deg)`;
             }
-            
-            // Apply rotation based on current orientation along with scaling
-            const rotation = deviceOrientation === 'landscape' ? 'rotate(90deg)' : 'rotate(0deg)';
-            googleButton.style.transform = `translate(-50%, -50%) scale(${scaleFactor}) ${rotation}`;
           };
         },
       });

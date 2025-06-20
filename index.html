@@ -139,19 +139,19 @@
               toggleButton.style.right = "10px";
               toggleButton.style.transform = "rotate(90deg)";
               
-              // Rotate Google button
+              // Rotate 
               googleButton.style.transform = "rotate(90deg)";
             } else {
-              // Keep original rotation in portrait mode
+              // Keep original
               videoPlane.setAttribute("rotation", "0 0 0");
               
-              // Reset toggle button position to top right
+              // Reset toggle
               toggleButton.style.top = "10px";
               toggleButton.style.bottom = "auto";
               toggleButton.style.right = "10px";
               toggleButton.style.transform = "rotate(0deg)";
               
-              // Reset Google button rotation
+            
               googleButton.style.transform = "translate(-50%, -50%) scale(1)";
             }
           };
@@ -165,7 +165,7 @@
             videoEl.play().catch(e => console.warn("Autoplay blocked:", e));
             toggleButton.style.display = "block";
             
-            // Apply current orientation when target is found
+          
             updateLayout(deviceOrientation);
           });
 
@@ -202,9 +202,9 @@
 
             // Adjust position based on orientation
             if (deviceOrientation === 'landscape') {
-              // Offset the button position to account for rotation
-              googleButton.style.left = `${x + 10}px`;  // Adjust these offset values as needed
-              googleButton.style.top = `${y - 30}px`;   // Adjust these offset values as needed
+              
+              googleButton.style.left = `${x + 10}px`;  
+              googleButton.style.top = `${y - 30}px`;  
             } else {
               googleButton.style.left = `${x}px`;
               googleButton.style.top = `${y}px`;
@@ -212,7 +212,7 @@
             
             // Apply rotation based on current orientation along with scaling
             const rotation = deviceOrientation === 'landscape' ? 'rotate(90deg)' : 'rotate(0deg)';
-            googleButton.style.transform = `translate(-50%, -50%) scale(${scaleFactor}) ${rotation}`;
+            googleButton.style.transform = `translate(-50%, -10%) scale(${scaleFactor}) ${rotation}`;
           };
         },
       });

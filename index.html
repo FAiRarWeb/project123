@@ -130,27 +130,29 @@
             console.log("Device orientation:", orientation);
             
             if (orientation === 'landscape') {
-              // Toggle button handling
+              // Keep video in original orientation (no rotation)
+              videoPlane.setAttribute("rotation", "0 0 0");
+              
+              // Move toggle button to bottom right and rotate
               toggleButton.style.top = "auto";
-              toggleButton.style.bottom = "80px";
+              toggleButton.style.bottom = "10px";
               toggleButton.style.right = "10px";
               toggleButton.style.transform = "rotate(90deg)";
               
-              // Fixed position for Google button in landscape
-              googleButton.style.bottom = "20px";
-              googleButton.style.right = "20px";
-              googleButton.style.transform = "none";
+              // Rotate Google button
+              googleButton.style.transform = "rotate(90deg)";
             } else {
-              // Toggle button handling
+              // Keep original rotation in portrait mode
+              videoPlane.setAttribute("rotation", "0 0 0");
+              
+              // Reset toggle button position to top right
               toggleButton.style.top = "10px";
               toggleButton.style.bottom = "auto";
               toggleButton.style.right = "10px";
               toggleButton.style.transform = "rotate(0deg)";
               
-              // Fixed position for Google button in portrait
-              googleButton.style.bottom = "20px";
-              googleButton.style.right = "20px";
-              googleButton.style.transform = "none";
+              // Reset Google button rotation
+              googleButton.style.transform = "translate(-50%, -50%) scale(1)";
             }
           };
           
@@ -163,7 +165,7 @@
             videoEl.play().catch(e => console.warn("Autoplay blocked:", e));
             toggleButton.style.display = "block";
             
-          
+            // Apply current orientation when target is found
             updateLayout(deviceOrientation);
           });
 
@@ -181,22 +183,36 @@
             toggleButton.textContent = isHidden ? "Hide Button" : "Show Button";
           });
 
-          // Set a fixed position for the Google button
-          googleButton.style.position = "fixed";
-          googleButton.style.bottom = "20px";
-          googleButton.style.right = "20px";
-          googleButton.style.transform = "none";
-          
           this.tick = () => {
             if (googleButton.style.display !== "block" || !videoPlane.getAttribute("visible")) return;
-            
-            // No longer update Google button position based on video
-            // Only apply scaling if needed
+
+            const videoWorldPosition = new THREE.Vector3();
+            videoPlane.object3D.getWorldPosition(videoWorldPosition);
+
+            const vector = videoWorldPosition.clone();
+            vector.project(camera.children[0]);
+
+            const widthHalf = window.innerWidth / 2;
+            const heightHalf = window.innerHeight / 2;
+            const x = (vector.x * widthHalf) + widthHalf;
+            const y = -(vector.y * heightHalf) + heightHalf;
+
             const distance = camera.position.distanceTo(videoWorldPosition);
             const scaleFactor = Math.max(0.5, Math.min(1.5, 1 / Math.max(0.1, distance)));
+
+            // Adjust position based on orientation
+            if (deviceOrientation === 'landscape') {
+              // Offset the button position to account for rotation
+              googleButton.style.left = `${x + 10}px`;  // Adjust these offset values as needed
+              googleButton.style.top = `${y - 30}px`;   // Adjust these offset values as needed
+            } else {
+              googleButton.style.left = `${x}px`;
+              googleButton.style.top = `${y}px`;
+            }
             
-            // Apply only scaling, with fixed position
-            googleButton.style.transform = `scale(${scaleFactor})`;
+            // Apply rotation based on current orientation along with scaling
+            const rotation = deviceOrientation === 'landscape' ? 'rotate(90deg)' : 'rotate(0deg)';
+            googleButton.style.transform = `translate(-50%, -50%) scale(${scaleFactor}) ${rotation}`;
           };
         },
       });

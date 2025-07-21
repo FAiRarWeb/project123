@@ -42,24 +42,96 @@
         font-weight: bold;
         cursor: pointer;
         transform-origin: center;
+        transition: all 0.3s ease;
       }
 
       .control-button {
-        top: 10px;
-        right: 10px;
-        background-color: rgba(255, 255, 255, 0.7);
-        border-radius: 5px;
-        padding: 8px 12px;
+        position: absolute;
+        z-index: 20;
+        font-weight: bold;
+        cursor: pointer;
+        background-color: rgba(76, 175, 80, 0.8);
+        border-radius: 8px;
+        padding: 10px 15px;
         display: none;
+        border: none;
+        font-size: 16px;
+        color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transform-origin: center center;
+        transition: all 0.3s ease;
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      .animate-button {
+        bottom: 20px;
+        right: 20px;
+      }
+
+      .info-button {
+        bottom: 80px;
+        right: 20px;
+      }
+
+      .control-button:hover {
+        background-color: rgba(76, 175, 80, 1);
+        transform: scale(1.1) translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .control-button:active {
+        transform: scale(0.95);
+      }
+
+      .control-button.pressed {
+        background-color: #2E7D32;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       }
 
       .google-button {
-        background-color: #4285F4;
+        background: linear-gradient(145deg, #4285F4, #34A853);
         color: white;
         border: none;
-        border-radius: 4px;
-        padding: 10px 15px;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
         display: none;
+        font-size: 20px;
+        font-weight: bold;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .google-button:hover {
+        background: linear-gradient(145deg, #5294FF, #3CB15E);
+        transform: translate(-50%, -50%) scale(1.15) rotate(10deg);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+      }
+
+      @media (orientation: landscape) {
+        .animate-button {
+          bottom: 20px;
+          right: 20px;
+        }
+        
+        .info-button {
+          bottom: 20px;
+          right: 100px;
+        }
+      }
+
+      @media (orientation: portrait) {
+        .animate-button {
+          bottom: 20px;
+          right: 20px;
+        }
+        
+        .info-button {
+          bottom: 80px;
+          right: 20px;
+        }
       }
     </style>
   </head>
@@ -86,7 +158,19 @@
       <a-entity mindar-image-target="targetIndex: 0" videohandler>
         <a-video
           src="#video1"
-          position="0 0 0"
+          position="0 0 0.01"
+          width="1"
+          height="0.45"
+          autoplay="false"
+          loop="true"
+          visible="false"
+        ></a-video>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 1" videohandler>
+        <a-video
+          src="#video1"
+          position="0 0 0.01"
           width="1"
           height="0.45"
           autoplay="false"
@@ -96,98 +180,190 @@
       </a-entity>
     </a-scene>
 
-    <button id="toggleButton" class="control-button">Show Button</button>
+    <button id="animateButton" class="control-button animate-button">Animate Me</button>
+    <button id="infoButton" class="control-button info-button">Info</button>
     <button id="googleButton" class="google-button" onclick="window.open('https://www.google.com', '_blank')">i</button>
 
     <script>
+      // Global state tracking
+      window.targetStates = {};
+      window.isAnimatePressed = false;
+      window.currentVideoPlane = null;
+      window.deviceOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+
       AFRAME.registerComponent("videohandler", {
         init: function () {
           const videoEl = document.querySelector("#video1");
-          const videoPlane = this.el.querySelector("a-video");
-          const toggleButton = document.querySelector("#toggleButton");
+          const animateButton = document.querySelector("#animateButton");
+          const infoButton = document.querySelector("#infoButton");
           const googleButton = document.querySelector("#googleButton");
           const camera = document.querySelector("a-camera").object3D;
+
+          const thisVideoPlane = this.el.querySelector("a-video");
+          const targetIndex = this.el.getAttribute("mindar-image-target").targetIndex;
           
-          // Track device orientation
-          let deviceOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
-          
-          // Device orientation detection
-          window.addEventListener("deviceorientation", (event) => {
-            // Get gamma (rotation around front-to-back axis)
-            const gamma = Math.abs(event.gamma);
-            
-            // Determine orientation based on gamma angle
-            const newOrientation = (gamma > 45 && gamma < 135) ? 'landscape' : 'portrait';
-            
-            // Only update if orientation changed
-            if (newOrientation !== deviceOrientation) {
-              deviceOrientation = newOrientation;
-              updateLayout(deviceOrientation);
-            }
-          }, true);
-          
-          const updateLayout = (orientation) => {
-            console.log("Device orientation:", orientation);
-            
-            if (orientation === 'landscape') {
-              // Keep video in original orientation (no rotation)
-              videoPlane.setAttribute("rotation", "0 0 0");
-              
-              // Move toggle button to bottom right and rotate
-              toggleButton.style.top = "auto";
-              toggleButton.style.bottom = "80px";
-              toggleButton.style.right = "10px";
-              toggleButton.style.transform = "rotate(90deg)";
-              
-              // Rotate Google button
-              googleButton.style.transform = "rotate(90deg)";
-            } else {
-              // Keep original rotation in portrait mode
-              videoPlane.setAttribute("rotation", "0 0 0");
-              
-              // Reset toggle button position to top right
-              toggleButton.style.top = "10px";
-              toggleButton.style.bottom = "auto";
-              toggleButton.style.right = "10px";
-              toggleButton.style.transform = "rotate(0deg)";
-              
-              // Reset Google button rotation
-              googleButton.style.transform = "translate(-50%, -50%) scale(1)";
-            }
+          // Initialize this target's state
+          window.targetStates[targetIndex] = false;
+
+          const PORTRAIT = {
+            animateButton: { bottom: "20px", right: "20px" },
+            infoButton: { bottom: "80px", right: "20px" }
           };
           
-          // Initialize layout based on current orientation
-          updateLayout(deviceOrientation);
-          
-          this.el.addEventListener("targetFound", () => {
-            console.log("Target found");
-            videoPlane.setAttribute("visible", true);
-            videoEl.play().catch(e => console.warn("Autoplay blocked:", e));
-            toggleButton.style.display = "block";
+          const LANDSCAPE = {
+            animateButton: { bottom: "10%", right: "66%" },
+            infoButton: { bottom: "6%", right: "60%" }
+          };
+
+          if (!window.videoHandlerInitialized) {
+            window.videoHandlerInitialized = true;
             
-            // Apply current orientation when target is found
-            updateLayout(deviceOrientation);
+            const updateLayout = (orientation) => {
+              window.deviceOrientation = orientation;
+              
+              if (orientation === 'landscape') {
+                animateButton.style.bottom = LANDSCAPE.animateButton.bottom;
+                animateButton.style.right = LANDSCAPE.animateButton.right;
+                animateButton.style.transform = "rotate(90deg)";
+                
+                infoButton.style.bottom = LANDSCAPE.infoButton.bottom;
+                infoButton.style.right = LANDSCAPE.infoButton.right;
+                infoButton.style.transform = "rotate(90deg)";
+              } else {
+                animateButton.style.transform = "rotate(0deg)";
+                animateButton.style.bottom = PORTRAIT.animateButton.bottom;
+                animateButton.style.right = PORTRAIT.animateButton.right;
+                
+                infoButton.style.transform = "rotate(0deg)";
+                infoButton.style.bottom = PORTRAIT.infoButton.bottom;
+                infoButton.style.right = PORTRAIT.infoButton.right;
+              }
+              
+              if (googleButton.style.display === "block") {
+                const rotation = orientation === 'landscape' ? 'rotate(90deg)' : 'rotate(0deg)';
+                googleButton.style.transform = `translate(-50%, -50%) scale(1) ${rotation}`;
+              }
+            };
+
+            window.addEventListener("deviceorientation", (event) => {
+              const gamma = Math.abs(event.gamma);
+              const newOrientation = (gamma > 45 && gamma < 135) ? 'landscape' : 'portrait';
+              
+              if (newOrientation !== window.deviceOrientation) {
+                updateLayout(newOrientation);
+              }
+            }, true);
+            
+            window.addEventListener('resize', () => {
+              const newOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+              if (newOrientation !== window.deviceOrientation) {
+                updateLayout(newOrientation);
+              }
+            });
+
+            window.addEventListener('orientationchange', () => {
+              setTimeout(() => {
+                const newOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+                updateLayout(newOrientation);
+              }, 100);
+            });
+            
+            updateLayout(window.deviceOrientation);
+
+            const checkAndPlayVideo = () => {
+              const anyTargetFound = Object.values(window.targetStates).some(state => state);
+              
+              if (window.isAnimatePressed && anyTargetFound && window.currentVideoPlane) {
+                window.currentVideoPlane.setAttribute("visible", true);
+                videoEl.play().catch(e => console.warn("Autoplay blocked:", e));
+              } else {
+                document.querySelectorAll("a-video").forEach(plane => {
+                  plane.setAttribute("visible", false);
+                });
+                videoEl.pause();
+              }
+            };
+
+            animateButton.addEventListener("click", () => {
+              window.isAnimatePressed = !window.isAnimatePressed;
+              
+              if (window.isAnimatePressed) {
+                googleButton.style.display = "none";
+                animateButton.classList.add("pressed");
+              } else {
+                animateButton.classList.remove("pressed");
+              }
+              
+              checkAndPlayVideo();
+            });
+
+            infoButton.addEventListener("click", () => {
+              const isHidden = googleButton.style.display === "none" || googleButton.style.display === "";
+              
+              if (isHidden) {
+                infoButton.classList.add("pressed");
+                googleButton.style.display = "block";
+                
+                document.querySelectorAll("a-video").forEach(plane => {
+                  plane.setAttribute("visible", false);
+                });
+                videoEl.pause();
+                window.isAnimatePressed = false;
+                animateButton.classList.remove("pressed");
+              } else {
+                infoButton.classList.remove("pressed");
+                googleButton.style.display = "none";
+              }
+            });
+          }
+
+          this.el.addEventListener("targetFound", () => {
+            window.targetStates[targetIndex] = true;
+            window.currentVideoPlane = thisVideoPlane;
+            animateButton.style.display = "block";
+            infoButton.style.display = "block";
+
+            if (window.isAnimatePressed) {
+              thisVideoPlane.setAttribute("visible", true);
+              videoEl.play().catch(e => console.warn("Autoplay blocked:", e));
+            }
           });
 
           this.el.addEventListener("targetLost", () => {
-            console.log("Target lost");
-            videoEl.pause();
-            videoPlane.setAttribute("visible", false);
-            toggleButton.style.display = "none";
-            googleButton.style.display = "none";
-          });
-
-          toggleButton.addEventListener("click", () => {
-            const isHidden = googleButton.style.display === "none" || googleButton.style.display === "";
-            googleButton.style.display = isHidden ? "block" : "none";
-            toggleButton.textContent = isHidden ? "Hide Button" : "Show Button";
+            window.targetStates[targetIndex] = false;
+            thisVideoPlane.setAttribute("visible", false);
+            
+            // Check if any other targets are still found
+            const anyTargetFound = Object.values(window.targetStates).some(state => state);
+            
+            if (!anyTargetFound) {
+              window.currentVideoPlane = null;
+              videoEl.pause();
+              animateButton.style.display = "none";
+              infoButton.style.display = "none";
+              googleButton.style.display = "none";
+              window.isAnimatePressed = false;
+              animateButton.classList.remove("pressed");
+              infoButton.classList.remove("pressed");
+            } else {
+              // Find another active target
+              for (let i in window.targetStates) {
+                if (window.targetStates[i]) {
+                  const activeTarget = document.querySelector(`[mindar-image-target="targetIndex: ${i}"]`);
+                  if (activeTarget) {
+                    window.currentVideoPlane = activeTarget.querySelector("a-video");
+                    break;
+                  }
+                }
+              }
+            }
           });
 
           this.tick = () => {
-            if (googleButton.style.display !== "block" || !videoPlane.getAttribute("visible")) return;
+            if (googleButton.style.display !== "block" || !window.currentVideoPlane) return;
 
             const videoWorldPosition = new THREE.Vector3();
-            videoPlane.object3D.getWorldPosition(videoWorldPosition);
+            window.currentVideoPlane.object3D.getWorldPosition(videoWorldPosition);
 
             const vector = videoWorldPosition.clone();
             vector.project(camera.children[0]);
@@ -200,18 +376,10 @@
             const distance = camera.position.distanceTo(videoWorldPosition);
             const scaleFactor = Math.max(0.5, Math.min(1.5, 1 / Math.max(0.1, distance)));
 
-            // Adjust position based on orientation
-            if (deviceOrientation === 'landscape') {
-              // Offset the button position to account for rotation
-              googleButton.style.left = `${x + 10}px`;  // Adjust these offset values as needed
-              googleButton.style.top = `${y - 90}px`;   // Adjust these offset values as needed
-            } else {
-              googleButton.style.left = `${x}px`;
-              googleButton.style.top = `${y}px`;
-            }
-            
-            // Apply rotation based on current orientation along with scaling
-            const rotation = deviceOrientation === 'landscape' ? 'rotate(90deg)' : 'rotate(0deg)';
+            googleButton.style.left = `${x}px`;
+            googleButton.style.top = `${y}px`;
+
+            const rotation = window.deviceOrientation === 'landscape' ? 'rotate(90deg)' : 'rotate(0deg)';
             googleButton.style.transform = `translate(-50%, -50%) scale(${scaleFactor}) ${rotation}`;
           };
         },
